@@ -6,55 +6,62 @@ import datetime
 import p_func_list as func
 
 def insert_btn():
-    mes.delete(0, tk.END)
-    mes.insert(0, "追加処理中です")
-    col_l_int = []
-    col_l_float = []
-    col_l_date = []
-    dt = datetime.date.today()
-    year = dt.strftime('%Y')[2:4]
-    month = dt.strftime('%m')
-    order = "NO" + str(year) + str(month)
-    df = func.df_read_sql_con(table_name, "", "main")
-    if df is None:
-        item_no = order + "-000001"
-    else:
-        df['order_year_month'] = df['item_no'].str.slice(0, 6)
-        df = df[(df['order_year_month'] == order)]
-        if df.empty:
+    if tb_1.get() == "":
+        return
+    if "http" in tb_1.get():
+        mes.delete(0, tk.END)
+        mes.insert(0, "追加処理中です")
+        col_l_int = []
+        col_l_float = []
+        col_l_date = []
+        dt = datetime.date.today()
+        year = dt.strftime('%Y')[2:4]
+        month = dt.strftime('%m')
+        order = "NO" + str(year) + str(month)
+        df = func.df_read_sql_con(table_name, "", "main")
+        if df is None:
             item_no = order + "-000001"
         else:
-            df = df.fillna("").sort_values(by=['item_no'], ascending=[False])
-            no = None
-            for r in df.itertuples():
-                no = r.item_no
-                break
-            no = int(no[7:13])
-            if no < 9:
-                item_no = order + "-00000" + str(no + 1)
-            elif no < 99:
-                item_no = order + "-0000" + str(no + 1)
-            elif no < 999:
-                item_no = order + "-000" + str(no + 1)
-            elif no < 9999:
-                item_no = order + "-00" + str(no + 1)
-            elif no < 99999:
-                item_no = order + "-0" + str(no + 1)
+            df['order_year_month'] = df['item_no'].str.slice(0, 6)
+            df = df[(df['order_year_month'] == order)]
+            if df.empty:
+                item_no = order + "-000001"
             else:
-                item_no = order + "-" + str(no + 1)
-    dt = datetime.datetime.now()
-    text_l = [item_no, tb_1.get(), dt, "未ダウンロード", None, None, None]
-    func.tb_sql_insert(table_name, col_l, col_l_int, col_l_float ,col_l_date, text_l)
-    df = func.df_read_sql_con(table_name, "", "main")
-    if df is not None:
-        df = df.fillna("")
-        func.tk_tree_display(tree, df)
+                df = df.fillna("").sort_values(by=['item_no'], ascending=[False])
+                no = None
+                for r in df.itertuples():
+                    no = r.item_no
+                    break
+                no = int(no[7:13])
+                if no < 9:
+                    item_no = order + "-00000" + str(no + 1)
+                elif no < 99:
+                    item_no = order + "-0000" + str(no + 1)
+                elif no < 999:
+                    item_no = order + "-000" + str(no + 1)
+                elif no < 9999:
+                    item_no = order + "-00" + str(no + 1)
+                elif no < 99999:
+                    item_no = order + "-0" + str(no + 1)
+                else:
+                    item_no = order + "-" + str(no + 1)
+        dt = datetime.datetime.now()
+        text_l = [item_no, tb_1.get(), dt, "未ダウンロード", None, None, None]
+        func.tb_sql_insert(table_name, col_l, col_l_int, col_l_float ,col_l_date, text_l)
+        df = func.df_read_sql_con(table_name, "", "main")
+        if df is not None:
+            df = df.fillna("")
+            func.tk_tree_display(tree, df)
+        else:
+            tree.delete(*tree.get_children())
+        tb_1.delete(0, tk.END)
+        mes.delete(0, tk.END)
+        mes.insert(0, "追加処理が完了しました")
+        func.txt_box_val_del(mes, 2000)
     else:
-        tree.delete(*tree.get_children())
-    tb_1.delete(0, tk.END)
-    mes.delete(0, tk.END)
-    mes.insert(0, "追加処理が完了しました")
-    func.txt_box_val_del(mes, 2000)
+        mes.delete(0, tk.END)
+        mes.insert(0, "URLがインターネットのURLではありません")
+        func.txt_box_val_del(mes, 2000)
 
 def delete_btn():
     mes_txt = "選択されている項目を削除しますが、よろしいですか？"
