@@ -18,7 +18,7 @@ def insert_btn():
         year = dt.strftime('%Y')[2:4]
         month = dt.strftime('%m')
         order = "NO" + str(year) + str(month)
-        df = func.df_read_sql_con(table_name, "", "main")
+        df = func.df_read_sql_con(table_name, "")
         if df is None:
             item_no = order + "-000001"
         else:
@@ -48,7 +48,7 @@ def insert_btn():
         dt = datetime.datetime.now()
         text_l = [item_no, tb_1.get(), dt, "未ダウンロード", None, None, None]
         func.tb_sql_insert(table_name, col_l, col_l_int, col_l_float ,col_l_date, text_l)
-        df = func.df_read_sql_con(table_name, "", "main")
+        df = func.df_read_sql_con(table_name, "")
         if df is not None:
             df = df.fillna("")
             func.tk_tree_display(tree, df)
@@ -68,7 +68,7 @@ def delete_btn():
     c_name_l = ['item_no']
     val_no_l = [0]
     func.tree_item_del(mes_txt, table_name, c_name_l, val_no_l, tree, mes)
-    df = func.df_read_sql_con(table_name, "", "main")
+    df = func.df_read_sql_con(table_name, "")
     if df is not None:
         df = df.fillna("")
         func.tk_tree_display(tree, df)
@@ -88,7 +88,7 @@ def clip_get():
         year = dt.strftime('%Y')[2:4]
         month = dt.strftime('%m')
         order = "NO" + str(year) + str(month)
-        df = func.df_read_sql_con(table_name, "", "main")
+        df = func.df_read_sql_con(table_name, "")
         if df is None:
             item_no = order + "-000001"
         else:
@@ -118,7 +118,7 @@ def clip_get():
         dt = datetime.datetime.now()
         text_l = [item_no, clipboard_text, dt, "未ダウンロード", None, None, None]
         func.tb_sql_insert(table_name, col_l, col_l_int, col_l_float, col_l_date, text_l)
-        df = func.df_read_sql_con(table_name, "", "main")
+        df = func.df_read_sql_con(table_name, "")
         if df is not None:
             df = df.fillna("")
             func.tk_tree_display(tree, df)
@@ -140,7 +140,7 @@ main_frm.place(x=0, y=0, width=1920, height=1080)
 table_name = "public.down_list"
 col_l = ["item_no", "url", "registration_date", "down_status", "file_name", "file_type", "down_date"]
 l_tree = ["No", "ダウンロードURL", "登録日", "ステータス", "ファイル名", "ファイルタイプ", "ダウンロード日"]
-df = func.df_read_sql_con(table_name, "", "main")
+df = func.df_read_sql_con(table_name, "")
 if df is not None:
     df = df.fillna("")
 tree = func.tk_tree(main_frm, l_tree, 10, 10, 850, 1900, df, None, None)

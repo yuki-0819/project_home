@@ -54,27 +54,42 @@ def tb_sql_insert(table_name, col_l, col_l_int, col_l_float ,col_l_date, text_l)
     cur.close()
     pgdb.close()
 
+def tb_sql_update(table_name, col_l, col_l_int, col_l_float ,col_l_date, col_l_where, val_l_where, text_l):
+    pram = db_conn()
+    txt_l = []
+    for n, col in enumerate(col_l):
+        value = text_l[n]
+        # colがcol_l_intに含まれる場合は整数型へ変換
+        if col in col_l_int and value != "":
+            txt_l.append(int(float(value)))
+        # colがcol_l_floatに含まれる場合は浮動小数点型へ変換
+        elif col in col_l_float and value != "":
+            txt_l.append(float(value))
+        # colがcol_l_dateに含まれる場合はそのまま追加
+        elif col in col_l_date and value != "":
+            txt_l.append(value)
+        else:
+            txt_l.append(value if value != "" else None)  # 空白はNoneに変換
+    set_clause = ', '.join([f"{col} = %s" for col in col_l])  # "col1 = %s, col2 = %s, ..."
+    where_clause = ' AND '.join([f"{cond} = %s" for cond in col_l_where.keys()])  # "cond1 = %s AND cond2 = %s ..."
+    sql = f"UPDATE {table_name} SET {set_clause} WHERE {where_clause}"
+    # パラメータを結合 (更新する値 + 条件の値)
+    params = txt_l + val_l_where
+    pgdb = psycopg2.connect(pram["sql"])
+    cur = pgdb.cursor()
+    cur.execute(sql, params)
+    pgdb.commit()
+    cur.close()
+    pgdb.close()
+
 # dataframe高速読み込み_SQL_並列処理
-def df_read_sql_con(table_name, col_l, db):
+def df_read_sql_con(table_name, col_l):
     pram = db_conn()
     def fetch_data(offset):
-
         # 新しいデータベース接続を各スレッド内で生成
-        if db == "main":
-            query = f'SELECT {col_l} FROM {table_name} LIMIT {chunksize_max} OFFSET {offset}'
-            with conn.connect() as con:
-                df_chunk = pd.read_sql_query(sql=text(query), con=con)
-        else:
-            query = f'''
-               SELECT {col_l} FROM (
-                   SELECT t.*, ROWNUM rnum
-                   FROM {table_name} t
-                   WHERE ROWNUM <= {offset + chunksize_max}
-               )
-               WHERE rnum > {offset}
-               '''
-            with conn.connect() as con:
-                df_chunk = pd.read_sql_query(sql=text(query), con=con)
+        query = f'SELECT {col_l} FROM {table_name} LIMIT {chunksize_max} OFFSET {offset}'
+        with conn.connect() as con:
+            df_chunk = pd.read_sql_query(sql=text(query), con=con)
         return df_chunk
     # db_config選択
     conn = pram["main"]
