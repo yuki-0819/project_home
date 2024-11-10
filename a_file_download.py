@@ -52,7 +52,7 @@ def proc_open():
             # 保存先のフルパスを生成
             save_path = os.path.join(addr, file_name)
             # ファイルをダウンロード
-            response = requests.get(r.url, stream=True)
+            response = requests.get(r.url, stream=True, timeout=10)
             if response.status_code == 200:
                 with open(save_path, 'wb') as file:
                     for chunk in response.iter_content(chunk_size=chunk_size):
